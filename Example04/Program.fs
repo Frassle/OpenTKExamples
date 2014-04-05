@@ -17,10 +17,11 @@ type Window(width, height, mode, title, options) as this =
 
     let points = 
         [|
-            Vertex(Vector4(-0.5f, 0.0f, 1.0f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f))
-            Vertex(Vector4(-0.5f, 0.0f, 1.0f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f))
-            Vertex(Vector4(-0.5f, 0.0f, 1.0f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f))
+            Vertex(Vector4(-0.5f, 0.0f, 0.0f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f))
+            Vertex(Vector4(0.5f, 0.0f, 0.0f, 1.0f), Vector4(0.0f, 1.0f, 0.0f, 1.0f))
+            Vertex(Vector4(0.0f, 0.5f, 0.0f, 1.0f), Vector4(0.0f, 0.0f, 1.0f, 1.0f))
         |]
+
 
     let vertexSource = """
         #version 330
@@ -58,7 +59,7 @@ type Window(width, height, mode, title, options) as this =
 
     let vertexShader = createShader ShaderType.VertexShader vertexSource
 
-    let fragmentShader = createShader ShaderType.VertexShader vertexSource
+    let fragmentShader = createShader ShaderType.FragmentShader fragmentSource
 
     let program =
         let program = GL.CreateProgram()
@@ -80,7 +81,7 @@ type Window(width, height, mode, title, options) as this =
 
     do     
         // Transfer the vertices from CPU to GPU.
-        GL.BufferData(BufferTarget.ArrayBuffer, nativeint(3 * 8 * sizeof<float32>), points, BufferUsageHint.StaticDraw)
+        GL.BufferData(BufferTarget.ArrayBuffer, nativeint(3 * sizeof<Vertex>), points, BufferUsageHint.StaticDraw)
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0)
 
         // Use the program.
@@ -90,10 +91,10 @@ type Window(width, height, mode, title, options) as this =
     
         GL.BindBuffer(BufferTarget.ArrayBuffer, verticesVbo)
 
-        GL.VertexAttribPointer(vertexPosition, 4, VertexAttribPointerType.Float, false, sizeof<float32> * 8, 0)
+        GL.VertexAttribPointer(vertexPosition, 4, VertexAttribPointerType.Float, false, sizeof<Vertex>, 0)
         GL.EnableVertexAttribArray(vertexPosition)
 
-        GL.VertexAttribPointer(vertexColor, 4, VertexAttribPointerType.Float, false, sizeof<float32> * 8, sizeof<float32> * 4)
+        GL.VertexAttribPointer(vertexColor, 4, VertexAttribPointerType.Float, false, sizeof<Vertex>, sizeof<Vector4>)
         GL.EnableVertexAttribArray(vertexColor)
 
     do
