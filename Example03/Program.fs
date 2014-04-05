@@ -41,13 +41,13 @@ type Window(width, height, mode, title, options) as this =
         }
         """
 
-    let vertex_shader =
+    let vertexShader =
         let shader = GL.CreateShader(ShaderType.VertexShader)
         GL.ShaderSource(shader, vertexSource)
         GL.CompileShader(shader)
         shader
 
-    let fragment_shader = 
+    let fragmentShader = 
         let shader = GL.CreateShader(ShaderType.FragmentShader)
         GL.ShaderSource(shader, fragmentSource)
         GL.CompileShader(shader)
@@ -55,8 +55,8 @@ type Window(width, height, mode, title, options) as this =
 
     let program =
         let program = GL.CreateProgram()
-        GL.AttachShader(program, vertex_shader)
-        GL.AttachShader(program, fragment_shader)
+        GL.AttachShader(program, vertexShader)
+        GL.AttachShader(program, fragmentShader)
         GL.LinkProgram(program)
         program
         
