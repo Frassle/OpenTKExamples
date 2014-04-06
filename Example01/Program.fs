@@ -1,14 +1,14 @@
 ﻿open OpenTK
 open OpenTK.Graphics.OpenGL4
 
-type Window(width, height, mode, title, options) as this =
+type Window(width, height, mode, title, options) =
     inherit GameWindow(width, height, mode, title, options)
 
     // Function for initialization.
-    do
-        this.Context.MakeCurrent(this.WindowInfo)
+    override this.OnLoad(e) =
         // The background will just cleared with blue color.
         GL.ClearColor(0.0f, 0.0f, 1.0f, 0.0f)
+        base.OnLoad(e)
 
     // Function is called before first update and every time when the window is resized.
     override this.OnResize(e) =

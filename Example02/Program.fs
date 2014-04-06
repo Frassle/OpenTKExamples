@@ -1,12 +1,9 @@
 ﻿open OpenTK
 open OpenTK.Graphics.OpenGL4
 
-type Window(width, height, mode, title, options) as this =
+type Window(width, height, mode, title, options) =
     inherit GameWindow(width, height, mode, title, options)
-
-    do
-        this.Context.MakeCurrent(this.WindowInfo)
-        
+    
     let vertexSource = """
         #version 330
 
@@ -28,44 +25,51 @@ type Window(width, height, mode, title, options) as this =
 	        outputColor = vec4(1.0, 0.0, 0.0, 1.0);
         }
         """
-
+        
     // Points of a triangle in normalized device coordinates.
     let points = [| -0.5f; 0.0f; 0.0f; 1.0f; 0.5f; 0.0f; 0.0f; 1.0f; 0.0f; 0.5f; 0.0f; 1.0f |]
     
-    // Load the source of the vertex and fragment shader.
-    let vertexShader = 
-        let shader = GL.CreateShader(ShaderType.VertexShader)
-        GL.ShaderSource(shader, vertexSource)
-        GL.CompileShader(shader)
-        shader
+    let mutable vertexShader = 0
+    let mutable fragmentShader = 0
+    let mutable program = 0
+
+    let mutable verticesVbo = 0
+    let mutable vao = 0
+
+    override this.OnLoad(e) =    
+        // Load the source of the vertex and fragment shader.
+        vertexShader <-
+            let shader = GL.CreateShader(ShaderType.VertexShader)
+            GL.ShaderSource(shader, vertexSource)
+            GL.CompileShader(shader)
+            shader
         
-    let fragmentShader = 
-        let shader = GL.CreateShader(ShaderType.FragmentShader)
-        GL.ShaderSource(shader, fragmentSource)
-        GL.CompileShader(shader)
-        shader
+        fragmentShader <-
+            let shader = GL.CreateShader(ShaderType.FragmentShader)
+            GL.ShaderSource(shader, fragmentSource)
+            GL.CompileShader(shader)
+            shader
     
-    // Build the program.
-    let program = 
-        let program = GL.CreateProgram()
-        GL.AttachShader(program, vertexShader)
-        GL.AttachShader(program, fragmentShader)
-        GL.LinkProgram(program)
-        program
+        // Build the program.
+        program <- 
+            let program = GL.CreateProgram()
+            GL.AttachShader(program, vertexShader)
+            GL.AttachShader(program, fragmentShader)
+            GL.LinkProgram(program)
+            program
 
-    // Create and bind the VBO for the vertices.
-    let verticesVbo = 
-        let buffer = GL.GenBuffer()
-        GL.BindBuffer(BufferTarget.ArrayBuffer, buffer)
-        buffer
+        // Create and bind the VBO for the vertices.
+        verticesVbo <-
+            let buffer = GL.GenBuffer()
+            GL.BindBuffer(BufferTarget.ArrayBuffer, buffer)
+            buffer
     
-    // Create the VAO for the program.
-    let vao = 
-        let array = GL.GenVertexArray()
-        GL.BindVertexArray(array)
-        array
+        // Create the VAO for the program.
+        vao <-
+            let array = GL.GenVertexArray()
+            GL.BindVertexArray(array)
+            array
 
-    do     
         // Transfer the vertices from CPU to GPU.
         GL.BufferData(BufferTarget.ArrayBuffer, nativeint(3 * 4 * sizeof<float32>), points, BufferUsageHint.StaticDraw)
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0)
@@ -82,6 +86,19 @@ type Window(width, height, mode, title, options) as this =
         GL.EnableVertexAttribArray(vertexPosition)
 
         GL.ClearColor(0.0f, 0.0f, 1.0f, 0.0f)
+        base.OnLoad(e)
+
+    // Function to delete resources
+    override this.OnUnload(e) = 
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0)
+        GL.DeleteBuffer(verticesVbo)
+        GL.DeleteVertexArray(vao)
+
+        GL.UseProgram(0)
+        GL.DeleteProgram(program)
+        GL.DeleteShader(vertexShader)
+        GL.DeleteShader(fragmentShader)
+        base.OnUnload(e)
 
     override this.OnResize(e) =
         GL.Viewport(0, 0, this.Width, this.Height)
@@ -95,15 +112,6 @@ type Window(width, height, mode, title, options) as this =
 
         this.Context.SwapBuffers()
         base.OnRenderFrame(e)
-
-    override this.OnClosing(e) = 
-        GL.BindBuffer(BufferTarget.ArrayBuffer, 0)
-        GL.DeleteBuffer(verticesVbo)
-        GL.DeleteVertexArray(vao)
-        GL.UseProgram(0)
-        GL.DeleteProgram(program)
-        GL.DeleteShader(vertexShader)
-        GL.DeleteShader(fragmentShader)
 
 [<EntryPoint>]
 let main argv = 

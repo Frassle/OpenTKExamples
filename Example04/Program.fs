@@ -56,30 +56,37 @@ type Window(width, height, mode, title, options) as this =
         GL.ShaderSource(shader, source)
         GL.CompileShader(shader)
         shader
+        
+    let mutable vertexShader = 0
+    let mutable fragmentShader = 0
+    let mutable program = 0
 
-    let vertexShader = createShader ShaderType.VertexShader vertexSource
+    let mutable verticesVbo = 0
+    let mutable vao = 0
 
-    let fragmentShader = createShader ShaderType.FragmentShader fragmentSource
+    override this.OnLoad(e) =
+        vertexShader <- createShader ShaderType.VertexShader vertexSource
 
-    let program =
-        let program = GL.CreateProgram()
-        GL.AttachShader(program, vertexShader)
-        GL.AttachShader(program, fragmentShader)
-        GL.LinkProgram(program)
-        program
+        fragmentShader <- createShader ShaderType.FragmentShader fragmentSource
+
+        program <-
+            let program = GL.CreateProgram()
+            GL.AttachShader(program, vertexShader)
+            GL.AttachShader(program, fragmentShader)
+            GL.LinkProgram(program)
+            program
         
 
-    let verticesVbo = 
-        let buffer = GL.GenBuffer()
-        GL.BindBuffer(BufferTarget.ArrayBuffer, buffer)
-        buffer
+        verticesVbo <-
+            let buffer = GL.GenBuffer()
+            GL.BindBuffer(BufferTarget.ArrayBuffer, buffer)
+            buffer
     
-    let vao = 
-        let array = GL.GenVertexArray()
-        GL.BindVertexArray(array)
-        array
+        vao <-
+            let array = GL.GenVertexArray()
+            GL.BindVertexArray(array)
+            array
 
-    do     
         // Transfer the vertices from CPU to GPU.
         GL.BufferData(BufferTarget.ArrayBuffer, nativeint(3 * sizeof<Vertex>), points, BufferUsageHint.StaticDraw)
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0)
@@ -97,8 +104,18 @@ type Window(width, height, mode, title, options) as this =
         GL.VertexAttribPointer(vertexColor, 4, VertexAttribPointerType.Float, false, sizeof<Vertex>, sizeof<Vector4>)
         GL.EnableVertexAttribArray(vertexColor)
 
-    do
         GL.ClearColor(0.0f, 0.0f, 1.0f, 0.0f)
+        
+    override this.OnUnload(e) = 
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0)
+        GL.DeleteBuffer(verticesVbo)
+        GL.DeleteVertexArray(vao)
+
+        GL.UseProgram(0)
+        GL.DeleteProgram(program)
+        GL.DeleteShader(vertexShader)
+        GL.DeleteShader(fragmentShader)
+        base.OnUnload(e)
 
     override this.OnResize(e) =
         GL.Viewport(0, 0, this.Width, this.Height)

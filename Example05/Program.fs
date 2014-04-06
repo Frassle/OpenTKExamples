@@ -82,40 +82,50 @@ type Window(width, height, mode, title, options) as this =
             shader
         else
             failwith (GL.GetShaderInfoLog(shader))
+            
+    let mutable vertexShader = 0
+    let mutable fragmentShader = 0
+    let mutable program = 0
 
-    let vertexShader = createShader ShaderType.VertexShader vertexSource
-
-    let fragmentShader = createShader ShaderType.FragmentShader fragmentSource
-
-    let program =
-        let program = GL.CreateProgram()
-        GL.AttachShader(program, vertexShader)
-        GL.AttachShader(program, fragmentShader)
-        GL.LinkProgram(program)
-        let status = GL.GetProgram(program, GetProgramParameterName.LinkStatus)
-        if status <> 0 then
-            program
-        else
-            failwith (GL.GetProgramInfoLog(program))        
-
-    let verticesVbo = 
-        let buffer = GL.GenBuffer()
-        GL.BindBuffer(BufferTarget.ArrayBuffer, buffer)
-        buffer
+    let mutable timeLocation = 0
+    let mutable loopLocation = 0
     
-    let vao = 
-        let array = GL.GenVertexArray()
-        GL.BindVertexArray(array)
-        array
-    
+    let mutable verticesVbo = 0
+    let mutable vao = 0
+
     // variable to keep track of total time    
     let mutable time = 0.0f
 
-    // Get the uniform locations        
-    let timeLocation = GL.GetUniformLocation(program, "time")
-    let loopLocation = GL.GetUniformLocation(program, "loop")
+    override this.OnLoad(e) =
+        vertexShader <- createShader ShaderType.VertexShader vertexSource
 
-    do     
+        fragmentShader <- createShader ShaderType.FragmentShader fragmentSource
+
+        program <-
+            let program = GL.CreateProgram()
+            GL.AttachShader(program, vertexShader)
+            GL.AttachShader(program, fragmentShader)
+            GL.LinkProgram(program)
+            let status = GL.GetProgram(program, GetProgramParameterName.LinkStatus)
+            if status <> 0 then
+                program
+            else
+                failwith (GL.GetProgramInfoLog(program))        
+
+        verticesVbo <-
+            let buffer = GL.GenBuffer()
+            GL.BindBuffer(BufferTarget.ArrayBuffer, buffer)
+            buffer
+    
+        vao <-
+            let array = GL.GenVertexArray()
+            GL.BindVertexArray(array)
+            array
+
+        // Get the uniform locations        
+        timeLocation <- GL.GetUniformLocation(program, "time")
+        loopLocation <- GL.GetUniformLocation(program, "loop")
+ 
         // Transfer the vertices from CPU to GPU.
         GL.BufferData(BufferTarget.ArrayBuffer, nativeint(3 * sizeof<Vertex>), points, BufferUsageHint.StaticDraw)
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0)
@@ -137,9 +147,18 @@ type Window(width, height, mode, title, options) as this =
         GL.VertexAttribPointer(vertexColorB, 4, VertexAttribPointerType.Float, false, sizeof<Vertex>, sizeof<Vector4> + sizeof<Color4>)
         GL.EnableVertexAttribArray(vertexColorB)
 
-
-    do
         GL.ClearColor(0.0f, 0.0f, 1.0f, 0.0f)
+        
+    override this.OnUnload(e) = 
+        GL.BindBuffer(BufferTarget.ArrayBuffer, 0)
+        GL.DeleteBuffer(verticesVbo)
+        GL.DeleteVertexArray(vao)
+
+        GL.UseProgram(0)
+        GL.DeleteProgram(program)
+        GL.DeleteShader(vertexShader)
+        GL.DeleteShader(fragmentShader)
+        base.OnUnload(e)
 
     override this.OnResize(e) =
         GL.Viewport(0, 0, this.Width, this.Height)
