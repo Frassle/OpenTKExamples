@@ -9,7 +9,7 @@ type Vertex =
         new(position : Vector4, color : Vector4) = { Position = position; Color = color }
     end 
 
-type Window(width, height, mode, title, options) as this =
+type Window(width, height, mode, title, options) =
     inherit GameWindow(width, height, mode, title, options)
     
     let points = 

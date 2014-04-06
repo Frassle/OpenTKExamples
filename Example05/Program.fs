@@ -12,7 +12,7 @@ type Vertex =
             { Position = position; ColorA = colorA; ColorB = colorB }
     end 
 
-type Window(width, height, mode, title, options) as this =
+type Window(width, height, mode, title, options) =
     inherit GameWindow(width, height, mode, title, options)
     
     let points = 

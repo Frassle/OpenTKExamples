@@ -1,7 +1,7 @@
 ﻿open OpenTK
 open OpenTK.Graphics.OpenGL4
 
-type Window(width, height, mode, title, options) as this =
+type Window(width, height, mode, title, options) =
     inherit GameWindow(width, height, mode, title, options)
         
     let points = [| 
