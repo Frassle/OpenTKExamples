@@ -11,10 +11,7 @@ type Vertex =
 
 type Window(width, height, mode, title, options) as this =
     inherit GameWindow(width, height, mode, title, options)
-
-    do
-        this.Context.MakeCurrent(this.WindowInfo)
-
+    
     let points = 
         [|
             Vertex(Vector4(-0.5f, 0.0f, 0.0f, 1.0f), Vector4(1.0f, 0.0f, 0.0f, 1.0f))
