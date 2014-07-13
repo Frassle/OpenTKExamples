@@ -17,38 +17,7 @@ type Window(width, height, mode, title, options) =
     let quad color p0 p1 p2 p3 = 
         [| p0; p1; p2; p2; p1; p3 |]
         |> Array.map (fun (p : Vector3) -> Vertex(Vector4(p.X, p.Y, p.Z, 1.0f), color))
-
-    let smallquad color p0 = 
-        quad color
-            <| p0
-            <| p0 + Vector3(0.1f, 0.0f, 0.0f)
-            <| p0 + Vector3(0.0f, 0.1f, 0.0f)
-            <| p0 + Vector3(0.1f, 0.1f, 0.0f)
-//
-//                Vector3[] positionVboData = new Vector3[]{
-//            new Vector3(-1.0f, -1.0f,  1.0f),
-//            new Vector3( 1.0f, -1.0f,  1.0f),
-//            new Vector3( 1.0f,  1.0f,  1.0f),
-//            new Vector3(-1.0f,  1.0f,  1.0f),
-//            new Vector3(-1.0f, -1.0f, -1.0f),
-//            new Vector3( 1.0f, -1.0f, -1.0f), 
-//            new Vector3( 1.0f,  1.0f, -1.0f),
-//            new Vector3(-1.0f,  1.0f, -1.0f) };
-//
-//        int[] indicesVboData = new int[]{
-//             // front face
-//                0, 1, 2, 2, 3, 0,
-//                // top face
-//                3, 2, 6, 6, 7, 3,
-//                // back face
-//                7, 6, 5, 5, 4, 7,
-//                // left face
-//                4, 0, 3, 3, 7, 4,
-//                // bottom face
-//                0, 1, 5, 5, 4, 0,
-//                // right face
-//                1, 5, 6, 6, 2, 1, };
-
+        
     let points =
         [|
             // Front quad
