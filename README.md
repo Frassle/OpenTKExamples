@@ -13,3 +13,4 @@ Examples
 5. Moving color changing triangle.
 6. Bouncing rotating cube.
 7. Simple textured quad.
+8. Bouncing rotating textured cube.
