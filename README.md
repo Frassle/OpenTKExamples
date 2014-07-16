@@ -14,3 +14,4 @@ Examples
 6. Bouncing rotating cube.
 7. Simple textured quad.
 8. Bouncing rotating textured cube.
+9. Same as example 8 but using element arrays.
